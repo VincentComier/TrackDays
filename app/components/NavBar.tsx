@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AuthButton from "./AuthButton";
 
 export default function Navbar() {
   return (
@@ -8,7 +9,7 @@ export default function Navbar() {
           {/* Logo */}
           <div>
             <Link href="/" className="text-2xl font-bold text-gray-900">
-              Logo
+              TrackDays
             </Link>
           </div>
 
@@ -18,35 +19,19 @@ export default function Navbar() {
               href="/tracks"
               className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium"
             >
-              tracks
+              Circuits
             </Link>
             <Link
-              href="/events"
+              href="/lap-times"
               className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium"
             >
-              events
+              Mes temps
             </Link>
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md mx-8">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="search"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* Login + SignUp */}
+          {/* Auth Button */}
           <div className="flex items-center space-x-4">
-            <Link
-              href="/login"
-              className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium"
-            >
-              Login + SignUp
-            </Link>
+            <AuthButton />
           </div>
         </div>
       </div>

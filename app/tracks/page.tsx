@@ -1,6 +1,5 @@
-
-
 import { getTracks } from "../actions/getTracks";
+import Link from "next/link";
 
 export default async function TracksPage() {
   const tracks = await getTracks();
@@ -12,15 +11,17 @@ export default async function TracksPage() {
       {tracks && tracks.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tracks.map((track) => (
-            <div
+            <Link
               key={track.id}
-              className="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+              href={`/tracks/${track.slug}`}
+              className="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             >
               <h2 className="text-xl font-semibold mb-2">{track.name}</h2>
               <p className="text-gray-600 mb-2">{track.country}</p>
-              <p className="text-sm text-gray-500">
-              </p>
-            </div>
+              {track.lengthKm && (
+                <p className="text-sm text-gray-500">{track.lengthKm} km</p>
+              )}
+            </Link>
           ))}
         </div>
       ) : (

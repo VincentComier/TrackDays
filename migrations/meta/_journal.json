@@ -8,6 +8,13 @@
       "when": 1768919434413,
       "tag": "0000_magenta_calypso",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768978001364,
+      "tag": "0001_curvy_lady_ursula",
+      "breakpoints": true
     }
   ]
 }
