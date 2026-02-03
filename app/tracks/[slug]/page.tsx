@@ -1,4 +1,6 @@
 import { getTrackBySlug } from "@/app/actions/getTrackBySlug";
+import { getTrackLayoutsByTrack } from "@/app/actions/getTrackLayouts";
+import { getTrackLeaderboard } from "@/app/actions/getTrackLeaderboard";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -6,6 +8,15 @@ interface TrackDetailPageProps {
   params: Promise<{
     slug: string;
   }>;
+}
+
+function formatLapTime(timeMs: number): string {
+  const minutes = Math.floor(timeMs / 60000);
+  const seconds = Math.floor((timeMs % 60000) / 1000);
+  const milliseconds = timeMs % 1000;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}.${milliseconds
+    .toString()
+    .padStart(3, "0")}`;
 }
 
 export default async function TrackDetailPage({ params }: TrackDetailPageProps) {
@@ -17,6 +28,17 @@ export default async function TrackDetailPage({ params }: TrackDetailPageProps) 
   }
 
   const track = result.track;
+  const layoutsResult = await getTrackLayoutsByTrack(track.id);
+  const leaderboardResult = await getTrackLeaderboard(track.id);
+  const layouts = layoutsResult.success ? layoutsResult.layouts : [];
+  const leaderboard = leaderboardResult.success ? leaderboardResult.lapTimes || [] : [];
+
+  const lapTimesByLayout = new Map<string, typeof leaderboard>();
+  leaderboard.forEach((lapTime) => {
+    const list = lapTimesByLayout.get(lapTime.trackLayout.id) || [];
+    list.push(lapTime);
+    lapTimesByLayout.set(lapTime.trackLayout.id, list);
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -114,6 +136,92 @@ export default async function TrackDetailPage({ params }: TrackDetailPageProps) 
               alt={track.name}
               className="w-full max-h-96 object-cover rounded-lg"
             />
+          </div>
+        )}
+      </div>
+
+      {/* Classement par circuit */}
+      <div className="bg-white rounded-lg shadow-md p-8 mt-8">
+        <h2 className="text-2xl font-bold mb-6">Classements</h2>
+
+        {layouts.length === 0 ? (
+          <p className="text-gray-500">Aucun tracé disponible pour ce circuit.</p>
+        ) : (
+          <div className="space-y-6">
+            {layouts.map((layout) => {
+              const layoutLapTimes = lapTimesByLayout.get(layout.id) || [];
+              const topLapTimes = layoutLapTimes.slice(0, 10);
+
+              return (
+                <div key={layout.id} className="border rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {layout.name}
+                    </h3>
+                    <span className="text-sm text-gray-500">
+                      Top 10
+                    </span>
+                  </div>
+
+                  {topLapTimes.length === 0 ? (
+                    <p className="text-gray-500">
+                      Aucun temps validé pour ce tracé.
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              #
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Pilote
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Voiture
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Temps
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {topLapTimes.map((lapTime, index) => (
+                            <tr key={lapTime.id} className="hover:bg-gray-50">
+                              <td className="px-4 py-2 text-sm text-gray-700">
+                                {index + 1}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-900">
+                                <Link
+                                  href={`/profile/${lapTime.user.id}`}
+                                  className="text-blue-600 hover:text-blue-800"
+                                >
+                                  {lapTime.user.name}
+                                </Link>
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-700">
+                                {lapTime.carModel.make} {lapTime.carModel.model}
+                                {lapTime.carModel.trim && ` ${lapTime.carModel.trim}`}
+                              </td>
+                              <td className="px-4 py-2 text-sm font-semibold text-gray-900">
+                                {formatLapTime(lapTime.timeMs)}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-500">
+                                {new Date(lapTime.drivenAt).toLocaleDateString("fr-FR")}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
