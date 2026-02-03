@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "@/lib/auth-client";
 import AuthButton from "./AuthButton";
 
 export default function Navbar() {
+  const { data: session } = useSession();
+
   return (
     <nav className="border-b bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,12 +26,14 @@ export default function Navbar() {
             >
               Circuits
             </Link>
-            <Link
-              href="/lap-times"
-              className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium"
-            >
-              Mes temps
-            </Link>
+            {session?.user && (
+              <Link
+                href="/lap-times"
+                className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+              >
+                Poste un temps
+              </Link>
+            )}
           </div>
 
           {/* Auth Button */}

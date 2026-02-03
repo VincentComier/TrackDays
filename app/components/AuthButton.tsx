@@ -20,7 +20,12 @@ export default function AuthButton() {
   if (session?.user) {
     return (
       <div className="flex items-center space-x-4">
-        <span className="text-sm text-gray-700">{session.user.name}</span>
+        <Link 
+          href={`/profile/${session.user.id}`}
+          className="text-sm text-gray-700 hover:text-blue-600 hover:underline"
+        >
+          {session.user.name}
+        </Link>
         <button
           onClick={handleLogout}
           disabled={loading}
